@@ -49,10 +49,6 @@ class Board:
             
             
 board = Board.parse_instance()
-
-print(board.adjacent_vertical_values(0, 0))
-print(board.adjacent_horizontal_values(0, 0))
-print(board.adjacent_vertical_values(1, 1))
-print(board.adjacent_horizontal_values(1, 1))
+board.print()
 
 
