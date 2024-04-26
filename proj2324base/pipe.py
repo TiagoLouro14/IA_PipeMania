@@ -6,7 +6,8 @@
 # 00000 Nome1
 # 00000 Nome2
 
-import sys
+from sys import stdin
+from search import Problem
 from search import (
     Problem,
     Node,
@@ -35,44 +36,40 @@ class PipeManiaState:
 class Board:
     """Representação interna de um tabuleiro de PipeMania."""
 
+    def __init__(self, board):
+        self.board = board
+        
     def get_value(self, row: int, col: int) -> str:
         """Devolve o valor na respetiva posição do tabuleiro."""
-        # TODO
-        pass
+        return self.board[row][col]
 
-    def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
-        """Devolve os valores imediatamente acima e abaixo,
-        respectivamente."""
-        # TODO
-        pass
+    def adjacent_vertical_values(self, row:int, col:int):
+        above = self.board[row-1][col] if row > 0 else None
+        below = self.board[row+1][col] if row+1 < len(self.board) else None
+        return (above, below)
 
-    def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
-        """Devolve os valores imediatamente à esquerda e à direita,
-        respectivamente."""
-        # TODO
-        pass
+    def adjacent_horizontal_values(self, row:int, col:int):
+        left = self.board[row][col-1] if col > 0 else None
+        right = self.board[row][col+1] if col+1 < len(self.board[row]) else None
+        return (left, right)
 
     @staticmethod
     def parse_instance():
-        """Lê o test do standard input (stdin) que é passado como argumento
-        e retorna uma instância da classe Board.
-
-        Por exemplo:
-            $ python3 pipe.py < test-01.txt
-
-            > from sys import stdin
-            > line = stdin.readline().split()
-        """
-        # TODO
-        pass
-
+        board_list = []
+        while True:
+            line = stdin.readline().split()
+            if not line:  
+                break
+            board_list.append(line)
+        return Board(board_list) 
+    
     # TODO: outros metodos da classe
-
 
 class PipeMania(Problem):
     def __init__(self, board: Board):
         """O construtor especifica o estado inicial."""
-        # TODO
+        super().__init__(board)
+        self.initial = board
         pass
 
     def actions(self, state: PipeManiaState):
@@ -103,11 +100,28 @@ class PipeMania(Problem):
 
     # TODO: outros metodos da classe
 
-
+'''
 if __name__ == "__main__":
-    # TODO:
-    # Ler o ficheiro do standard input,
-    # Usar uma técnica de procura para resolver a instância,
-    # Retirar a solução a partir do nó resultante,
-    # Imprimir para o standard output no formato indicado.
-    pass
+    # Read the input file from standard input
+    board = Board.parse_instance()
+
+    # Create an instance of the PipeMania problem
+    problem = PipeMania(board)
+
+    # Use a search technique to solve the instance
+    solution_node = astar_search(problem)
+
+    # Extract the solution from the resulting node
+    solution = solution_node.solution()
+
+    # Print the solution to the standard output in the specified format
+    print(solution)
+'''
+
+# Ler grelha do figura 1a:
+board = Board.parse_instance()
+
+print(board.adjacent_vertical_values(0, 0))
+print(board.adjacent_horizontal_values(0, 0))
+print(board.adjacent_vertical_values(1, 1))
+print(board.adjacent_horizontal_values(1, 1))
