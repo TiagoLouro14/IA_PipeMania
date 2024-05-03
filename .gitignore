@@ -1,2 +1,4 @@
 test pipe 1-9/*.diff
 test pipe 1-9/*.out
+proj2324base/t1.txt
+proj2324base/__pycache__

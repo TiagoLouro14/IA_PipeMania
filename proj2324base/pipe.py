@@ -2,11 +2,12 @@
 # Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
 # Além das funções e classes sugeridas, podem acrescentar outras que considerem pertinentes.
 
-# Grupo 00:
-# 00000 Nome1
-# 00000 Nome2
+# Grupo 11:
+# 104101 Tiago Queiroz de Orduña Dores Louro
+# 103562 Guilherme Neca Ribeiro
 
 from sys import stdin
+import numpy as np
 from search import Problem
 from search import (
     Problem,
@@ -38,7 +39,10 @@ class Board:
 
     def __init__(self, board):
         self.board = board
-        
+        self.pieces = {"FC","FB","FE","FD",
+        BC,BB,BE,BD,VC,VB,VE,VD,LH,LV}
+        self.columns = self.rows = len(board)  
+              
     def get_value(self, row: int, col: int) -> str:
         """Devolve o valor na respetiva posição do tabuleiro."""
         return self.board[row][col]
