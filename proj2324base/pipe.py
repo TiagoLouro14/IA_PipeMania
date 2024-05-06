@@ -37,35 +37,46 @@ class PipeManiaState:
 class Board:
     """Representação interna de um tabuleiro de PipeMania."""
 
-    def __init__(self, board):
-        self.board = board
-        self.pieces = {"FC","FB","FE","FD",
-        BC,BB,BE,BD,VC,VB,VE,VD,LH,LV}
-        self.columns = self.rows = len(board)  
+    def __init__(self, board_list, size:int):
+        self.board = np.array(board_list)
+        self.pieces = {"FC","FB","FE","FD","BC","BB","BE","BD","VC","VB","VE","VD","LH","LV"}
+        self.columns = self.rows = size
+          
               
     def get_value(self, row: int, col: int) -> str:
         """Devolve o valor na respetiva posição do tabuleiro."""
         return self.board[row][col]
 
-    def adjacent_vertical_values(self, row:int, col:int):
-        above = self.board[row-1][col] if row > 0 else None
-        below = self.board[row+1][col] if row+1 < len(self.board) else None
-        return (above, below)
+    def adjacent_vertical_values(self, row: int, col: int):
+        """Devolve os valores imediatamente acima e abaixo,
+        respectivamente."""
+        above = self.board[row - 1][col] if row > 0 else None
+        below = self.board[row + 1][col] if row < len(self.board) - 1 else None
+        return above, below
 
-    def adjacent_horizontal_values(self, row:int, col:int):
-        left = self.board[row][col-1] if col > 0 else None
-        right = self.board[row][col+1] if col+1 < len(self.board[row]) else None
-        return (left, right)
+    def adjacent_horizontal_values(self, row: int, col: int):
+        """Devolve os valores imediatamente à esquerda e à direita,
+        respectivamente."""
+        left = self.board[row][col - 1] if col > 0 else None
+        right = self.board[row][col + 1] if col < len(self.board[0]) - 1 else None
+        return left, right
 
     @staticmethod
     def parse_instance():
-        board_list = []
-        while True:
-            line = stdin.readline().split()
-            if not line:  
-                break
-            board_list.append(line)
-        return Board(board_list) 
+        # Read the input and strip newline character and any trailing whitespace from each line
+        lines = [line.rstrip('\n') for line in stdin.readlines()]
+
+        # Split each line into pieces by two spaces using list comprehension
+        board_list = [line.split('  ') for line in lines if line]
+
+        # Determine the size of the board
+        size = len(board_list)
+        print(board_list)
+        return Board(board_list, size)
+
+
+
+
     
     # TODO: outros metodos da classe
 
@@ -101,7 +112,9 @@ class PipeMania(Problem):
         """Função heuristica utilizada para a procura A*."""
         # TODO
         pass
-
+    
+    def __str__(self):
+        return '\n'.join(' '.join(row) for row in self.board_list)
     # TODO: outros metodos da classe
 
 '''
