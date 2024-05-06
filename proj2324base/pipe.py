@@ -71,12 +71,7 @@ class Board:
 
         # Determine the size of the board
         size = len(board_list)
-        print(board_list)
         return Board(board_list, size)
-
-
-
-
     
     # TODO: outros metodos da classe
 
@@ -138,7 +133,7 @@ if __name__ == "__main__":
 # Ler grelha do figura 1a:
 board = Board.parse_instance()
 
-print(board.adjacent_vertical_values(0, 0))
-print(board.adjacent_horizontal_values(0, 0))
-print(board.adjacent_vertical_values(1, 1))
-print(board.adjacent_horizontal_values(1, 1))
+#print(board.adjacent_vertical_values(0, 0))
+#print(board.adjacent_horizontal_values(0, 0))
+#print(board.adjacent_vertical_values(1, 1))
+#print(board.adjacent_horizontal_values(1, 1))
