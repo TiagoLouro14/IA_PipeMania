@@ -228,19 +228,16 @@ class PipeMania(Problem):
         super().__init__(initial_state)
         self.expected_count = self.count_expected_connections(board)
 
-
     def actions(self, state: PipeManiaState):
-        """Return a list of actions that can be executed from the given state."""
-        board = state.board.board
-        path = state.path
+        """Retorna uma lista de ações que podem ser executadas a
+        partir do estado passado como argumento."""
+        size = board.get_size()
         actions = []
-        for row in range(board.shape[0]):
-            for col in range(board.shape[1]):
-                # Only consider pieces adjacent to the current path
-                if (row, col) in path or any((r, c) in path for r, c in [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]):
-                    # Add actions to rotate the piece at (row, col) in both directions
-                    actions.append((row, col, True))
-                    actions.append((row, col, False))
+        for row in range(size):
+            for col in range(size):
+                # Add actions to rotate the piece at (row, col) in both directions
+                actions.append((row, col, True))
+                actions.append((row, col, False))
         return actions
     
     
@@ -333,6 +330,7 @@ class PipeMania(Problem):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
         estão preenchidas de acordo com as regras do problema."""
+        print("Real count: ", state.real_count)
         return self.expected_count == state.real_count 
     
 
@@ -403,15 +401,11 @@ print("Solution:\n", s11.board.print(), sep="")
 '''
 
 
-'''
 board = Board.parse_instance()
 # Criar uma instância de PipeMania:
 problem = PipeMania(board)
-print(board.print())
-print(board.get_size())
 # Obter o nó solução usando a procura em profundidade:
 goal_node = depth_first_tree_search(problem)
 # Verificar se foi atingida a solução
 print("Is goal?", problem.goal_test(goal_node.state))
 print("Solution:\n", goal_node.state.board.print(), sep="")
-'''
