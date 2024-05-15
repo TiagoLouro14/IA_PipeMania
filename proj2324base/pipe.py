@@ -8,7 +8,7 @@
 
 from sys import stdin
 import numpy as np
-from copy import deepcopy
+import copy
 from search import Problem
 from search import (
     Problem,
@@ -23,46 +23,172 @@ from search import (
 
 class PipeManiaState:
     state_id = 0
-
+    path = []
+    
     def __init__(self, board):
         self.board = board
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
-
+        self.real_count = self.count_real_connections(board)
+        self.path = []
+       
+        
     def __lt__(self, other):
         return self.id < other.id
+    
+    
+    def count_real_connections(self,board):
+        total_real_connections = 0
+        size = self.board.get_size()
+        # Calcular o número total de conexões reais
+        for row in range(size):
+            for col in range(size):
+                piece = self.board.get_piece(row, col)
+                if piece == "FC":
+                    up, _ = self.board.adjacent_vertical_values(row, col)
+                    if up in {"BB", "BD", "BE","VB","VE","LV"}:
+                        total_real_connections += 1
+                        
+                if piece == "FB":
+                    _, down = self.board.adjacent_vertical_values(row, col)
+                    if down in {"BC","BE","BD","VC","VD","LV"}:
+                        total_real_connections += 1
+                        
+                if piece == "FE":
+                    left, _ = self.board.adjacent_horizontal_values(row, col)
+                    if left in {"BC","BB","BD","VB","VD","LH"}:
+                        total_real_connections += 1
+                        
+                if piece == "FD":
+                    _, right = self.board.adjacent_horizontal_values(row, col)
+                    if right in {"BC","BB","BE","VC","VE","LH"}:
+                        total_real_connections += 1
+                        
+                if piece == "BC":
+                    up, _ = self.board.adjacent_vertical_values(row, col)
+                    left, right = self.board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        total_real_connections += 1
+                    if left in {"BC","FD","BB","BD","VB","VD","LH"}:
+                        total_real_connections += 1
+                    if right in {"BC","FE","BB","BE","VC","VE","LH"}:
+                        total_real_connections += 1
 
+                if piece == "BB":
+                    _, down = self.board.adjacent_vertical_values(row, col)
+                    left, right = self.board.adjacent_horizontal_values(row, col)
+                    if down in {"BC","FC","BE","BD","VC","VD","LV"}:
+                        total_real_connections += 1
+                    if left in {"BB","BC","BD","FD","VB","VD","LH"}:
+                        total_real_connections += 1
+                    if right in {"BB","BC","BE","FE","VC","VE","LH"}:
+                        total_real_connections += 1
+
+                if piece == "BE":
+                    up, down = self.board.adjacent_vertical_values(row, col)
+                    left, _ = self.board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BE","BB","BD","VB","VE","LV"}:
+                        total_real_connections += 1
+                    if down in {"FC","BC","BD","BE","VC","VD","LV"}:
+                        total_real_connections += 1
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        total_real_connections += 1
+                        
+                if piece == "BD":
+                    up, down = self.board.adjacent_vertical_values(row, col)
+                    _, right = self.board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BE","BB","BD","VB","VE","LV"}:
+                        total_real_connections += 1
+                    if down in {"FC","BC","BD","BE","VC","VD","LV"}:
+                        total_real_connections += 1
+                    if right in {"BB","BC","BE","FE","VC","VE","LH"}:
+                        total_real_connections += 1
+                
+                if piece == "VC":
+                    up, _ = self.board.adjacent_vertical_values(row, col)
+                    left, _ = self.board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        total_real_connections += 1
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        total_real_connections += 1
+
+                if piece == "VB":
+                    _, down = self.board.adjacent_vertical_values(row, col)
+                    _, right = self.board.adjacent_horizontal_values(row, col)
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        total_real_connections += 1
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        total_real_connections += 1
+                        
+                if piece == "VE":
+                    _, down = self.board.adjacent_vertical_values(row, col)
+                    left, _ = self.board.adjacent_horizontal_values(row, col)
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        total_real_connections += 1
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        total_real_connections += 1
+
+                if piece == "VD":
+                    up, _ = self.board.adjacent_vertical_values(row, col)
+                    _, right = self.board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        total_real_connections += 1
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        total_real_connections += 1
+
+                if piece == "LH":
+                    left, right = self.board.adjacent_horizontal_values(row, col)
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        total_real_connections += 1
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        total_real_connections += 1
+                
+                if piece == "LV":
+                    up, down = self.board.adjacent_vertical_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        total_real_connections += 1
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        total_real_connections += 1
+        return total_real_connections
+
+    
     # TODO: outros metodos da classe
 
 
 class Board:
     """Representação interna de um tabuleiro de PipeMania."""
 
-    def __init__(self, board_list, size:int):
-        self.board = np.array(board_list)
+    def __init__(self,board_input,size):
+        self.board = np.array(board_input,dtype=str)
         self.pieces = {"FC","FB","FE","FD","BC","BB",
                        "BE","BD","VC","VB","VE","VD","LH","LV"}
-        self.columns = self.rows = size
-          
-              
-    def get_value(self, row: int, col: int) -> str:
-        """Devolve o valor na respetiva posição do tabuleiro."""
-        return self.board[row][col]
+        self.path = []
+        
 
     def adjacent_vertical_values(self, row: int, col: int):
         """Devolve os valores imediatamente acima e abaixo,
         respectivamente."""
         above = self.board[row - 1][col] if row > 0 else None
-        below = self.board[row + 1][col] if row < len(self.board) - 1 else None
+        below = self.board[row + 1][col] if row < self.board.shape[0] - 1 else None
         return above, below
+
 
     def adjacent_horizontal_values(self, row: int, col: int):
         """Devolve os valores imediatamente à esquerda e à direita,
         respectivamente."""
         left = self.board[row][col - 1] if col > 0 else None
-        right = self.board[row][col + 1] if col < len(self.board[0]) - 1 else None
+        right = self.board[row][col + 1] if col < self.board.shape[1] - 1 else None
         return left, right
 
+
+    def get_size(self):
+        return self.board.shape[0]
+    
+    
+    def get_value(self, row: int, col: int):
+        """Devolve o valor na respetiva posição do tabuleiro."""
+        return self.board[row][col]
+    
     @staticmethod
     def parse_instance():
         # Read the input and strip newline character and any trailing whitespace from each line
@@ -70,33 +196,73 @@ class Board:
 
         # Split each line into pieces by two spaces using list comprehension
         board_list = [line.split('  ') for line in lines if line]
+        board = np.array(board_list)
 
-        return Board(board_list, len(board_list))
+        # Create a Board object
+        board_obj = Board(board, board.shape[0])
+
+        return board_obj
+
+
+    def get_piece(self, row, column):
+        return self.board[row][column]
     
-    def __str__(self):
+    
+    def set_piece(self, row, col, piece):
+        self.board[row][col] = piece
+    
+    
+    def print(self):
         """Return a string representation of the board."""
         return '\n'.join('  '.join(row) for row in self.board)
     
+
     # TODO: outros metodos da classe
 
+
 class PipeMania(Problem):
+    
     def __init__(self, board: Board):
-        """O construtor especifica o estado inicial."""
-        super().__init__(board)
-        self.initial = board
-        pass
+        """The constructor specifies the initial state."""
+        initial_state = PipeManiaState(board)
+        super().__init__(initial_state)
+        self.expected_count = self.count_expected_connections(board)
+
 
     def actions(self, state: PipeManiaState):
         """Return a list of actions that can be executed from the given state."""
+        board = state.board.board
+        path = state.path
         actions = []
-        for row in range(state.board.shape[0]):
-            for col in range(state.board.shape[1]):
-                # Add actions to rotate the piece at (row, col) in both directions
-                actions.append((row, col, True))
-                actions.append((row, col, False))
+        for row in range(board.shape[0]):
+            for col in range(board.shape[1]):
+                # Only consider pieces adjacent to the current path
+                if (row, col) in path or any((r, c) in path for r, c in [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]):
+                    # Add actions to rotate the piece at (row, col) in both directions
+                    actions.append((row, col, True))
+                    actions.append((row, col, False))
         return actions
     
+    
+    def count_expected_connections(self, board):
+        piece = {"FC": 1, "FB": 1, "FE": 1, "FD": 1, "BC": 3, "BB": 3, "BE": 3, "BD": 3, "VC": 2, "VB": 2, "VE": 2, "VD": 2, "LH": 2, "LV": 2}
+        piece_counts = {piece: 0 for piece in piece}
+        # Contar peças e calcular o número total de conexões esperadas
+        total_expected_connections = 0
+        size = board.get_size()
+        # Get unique values and their counts from the board
+        unique_values, counts = np.unique(board.board, return_counts=True)
+        
+        # Update piece_counts and total_expected_connections
+        for piece_key, count in zip(unique_values, counts):
+            if piece_key in piece_counts:
+                piece_counts[piece_key] += count
+                total_expected_connections += piece[piece_key] * count  # Use 'piece' instead of 'piece_connections'
+        return total_expected_connections
+    
+    
     def rotate_piece(self,piece, clockwise):
+        
         """Rotate the given piece in the specified direction."""
         if(piece == "FC"):
             return "FD" if clockwise else "FE"
@@ -139,33 +305,36 @@ class PipeMania(Problem):
         
         if(piece == "LV"):
             return "LH" if clockwise else "LV"
-        
-        
+    
+    
     def result(self, state: PipeManiaState, action):
-        """Return the state resulting from applying the given action to the given state."""
-        # Create a copy of the state
-        new_state = deepcopy(state)
+        # Create a deep copy of the current state's board
+        new_board = copy.deepcopy(state.board)
 
         # Unpack the action
         row, col, clockwise = action
 
-        # Rotate the piece at (row, col) in the specified direction
-        new_state.board.board[row][col] = self.rotate_piece(new_state.board.board[row][col], clockwise)
+        # Get the piece at the specified coordinates
+        piece = new_board.get_piece(row, col)
 
+        # Rotate the piece
+        rotated_piece = self.rotate_piece(piece, clockwise)
+
+        # Set the rotated piece at the specified coordinates
+        new_board.set_piece(row, col, rotated_piece)
+
+        # Create a new state with the updated board
+        new_state = PipeManiaState(new_board)
+    
         return new_state
-
-    def goal_test(self, piece, clockwise):
+    
+    
+    def goal_test(self, state):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
         estão preenchidas de acordo com as regras do problema."""
-        # TODO
-        pass
+        return self.expected_count == state.real_count 
     
-    def needs_rotation(self, piece):
-        """Return True if the given piece needs to be rotated to match the goal."""
-        if(piece == "FC" or piece == "BC" or piece == "VC"):
-            return True
-        return False
 
     def h(self, node: Node):
         """Heuristic function used for A* search."""
@@ -183,9 +352,11 @@ class PipeMania(Problem):
                     count += 1
 
         return count
-
-    def __str__(self):
+    
+    
+    def print(self):
         return '\n'.join(' '.join(row) for row in self.board_list)
+    
     # TODO: outros metodos da classe
 
 '''
@@ -204,12 +375,12 @@ if __name__ == "__main__":
 
     # Print the solution to the standard output in the specified format
     print(solution)
+
 '''
 
-# Ler grelha do figura 1a:
+'''
 board = Board.parse_instance()
-print(board)
-
+# Criar uma instância de PipeMania:
 problem = PipeMania(board)
 # Criar um estado com a configuração inicial:
 s0 = PipeManiaState(board)
@@ -220,11 +391,27 @@ s3 = problem.result(s2, (0, 2, True))
 s4 = problem.result(s3, (0, 2, True))
 s5 = problem.result(s4, (1, 0, True))
 s6 = problem.result(s5, (1, 1, True))
-s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (exemplo de uso) 
-s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (exemplo de uso) 
+s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (exemplo de uso)
+s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (exemplo de uso)
 s9 = problem.result(s8, (2, 1, True))
 s10 = problem.result(s9, (2, 1, True))
 s11 = problem.result(s10, (2, 2, True))
+# Verificar se foi atingida a solução
+print("Is goal?", problem.goal_test(s5))
+print("Is goal?", problem.goal_test(s11))
+print("Solution:\n", s11.board.print(), sep="")
+'''
 
-print("\nsolution?:\n")
-print(s11.board)
+
+'''
+board = Board.parse_instance()
+# Criar uma instância de PipeMania:
+problem = PipeMania(board)
+print(board.print())
+print(board.get_size())
+# Obter o nó solução usando a procura em profundidade:
+goal_node = depth_first_tree_search(problem)
+# Verificar se foi atingida a solução
+print("Is goal?", problem.goal_test(goal_node.state))
+print("Solution:\n", goal_node.state.board.print(), sep="")
+'''
