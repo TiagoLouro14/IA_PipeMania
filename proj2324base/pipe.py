@@ -38,120 +38,126 @@ class PipeManiaState:
     
     
     def count_real_connections(self,board):
-        total_real_connections = 0
-        size = self.board.get_size()
-        # Calcular o número total de conexões reais
+        # Contar peças e calcular o número total de conexões esperadas
+        size = board.get_size()
+        
+        connections = set()
+        
         for row in range(size):
             for col in range(size):
-                piece = self.board.get_piece(row, col)
-                if piece == "FC":
-                    up, _ = self.board.adjacent_vertical_values(row, col)
-                    if up in {"BB", "BD", "BE","VB","VE","LV"}:
-                        total_real_connections += 1
-                        
-                if piece == "FB":
-                    _, down = self.board.adjacent_vertical_values(row, col)
+                piece = board.get_piece(row, col)
+            
+                if piece == 'FB':
+                    _, down = board.adjacent_vertical_values(row, col)
                     if down in {"BC","BE","BD","VC","VD","LV"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row+1, col)))
                         
-                if piece == "FE":
-                    left, _ = self.board.adjacent_horizontal_values(row, col)
+                if piece == 'FC':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    if up in {"BB", "BD", "BE","VB","VE","LV"}:
+                        connections.add(((row, col), (row-1, col)))
+                
+                if piece == 'FE':
+                    left, _ = board.adjacent_horizontal_values(row, col)
                     if left in {"BC","BB","BD","VB","VD","LH"}:
-                        total_real_connections += 1
-                        
-                if piece == "FD":
-                    _, right = self.board.adjacent_horizontal_values(row, col)
+                        connections.add(((row, col), (row, col-1)))
+                
+                if piece == 'FD':
+                    _, right = board.adjacent_horizontal_values(row, col)
                     if right in {"BC","BB","BE","VC","VE","LH"}:
-                        total_real_connections += 1
-                        
-                if piece == "BC":
-                    up, _ = self.board.adjacent_vertical_values(row, col)
-                    left, right = self.board.adjacent_horizontal_values(row, col)
+                        connections.add(((row, col), (row, col+1)))
+                
+                if piece == 'BC':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    left, right = board.adjacent_horizontal_values(row, col)
                     if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row-1, col)))
                     if left in {"BC","FD","BB","BD","VB","VD","LH"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row, col-1)))
                     if right in {"BC","FE","BB","BE","VC","VE","LH"}:
-                        total_real_connections += 1
-
-                if piece == "BB":
-                    _, down = self.board.adjacent_vertical_values(row, col)
-                    left, right = self.board.adjacent_horizontal_values(row, col)
+                        connections.add(((row, col), (row, col+1)))
+                
+                if piece == 'BB':
+                    _, down = board.adjacent_vertical_values(row, col)
+                    left, right = board.adjacent_horizontal_values(row, col)
                     if down in {"BC","FC","BE","BD","VC","VD","LV"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row+1, col)))
                     if left in {"BB","BC","BD","FD","VB","VD","LH"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row, col-1)))
                     if right in {"BB","BC","BE","FE","VC","VE","LH"}:
-                        total_real_connections += 1
-
-                if piece == "BE":
-                    up, down = self.board.adjacent_vertical_values(row, col)
-                    left, _ = self.board.adjacent_horizontal_values(row, col)
+                        connections.add(((row, col), (row, col+1)))
+                
+                if piece == 'BE':
+                    up, down = board.adjacent_vertical_values(row, col)
+                    left, _ = board.adjacent_horizontal_values(row, col)
                     if up in {"FB","BE","BB","BD","VB","VE","LV"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row-1, col)))
                     if down in {"FC","BC","BD","BE","VC","VD","LV"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row+1, col)))
                     if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        total_real_connections += 1
-                        
-                if piece == "BD":
-                    up, down = self.board.adjacent_vertical_values(row, col)
-                    _, right = self.board.adjacent_horizontal_values(row, col)
+                        connections.add(((row, col), (row, col-1)))
+                
+                if piece == 'BD':
+                    up, down = board.adjacent_vertical_values(row, col)
+                    _, right = board.adjacent_horizontal_values(row, col)
                     if up in {"FB","BE","BB","BD","VB","VE","LV"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row-1, col)))
                     if down in {"FC","BC","BD","BE","VC","VD","LV"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row+1, col)))
                     if right in {"BB","BC","BE","FE","VC","VE","LH"}:
-                        total_real_connections += 1
-                
-                if piece == "VC":
-                    up, _ = self.board.adjacent_vertical_values(row, col)
-                    left, _ = self.board.adjacent_horizontal_values(row, col)
-                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        total_real_connections += 1
-                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        total_real_connections += 1
-
-                if piece == "VB":
-                    _, down = self.board.adjacent_vertical_values(row, col)
-                    _, right = self.board.adjacent_horizontal_values(row, col)
-                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
-                        total_real_connections += 1
-                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row, col+1)))
                         
-                if piece == "VE":
-                    _, down = self.board.adjacent_vertical_values(row, col)
-                    left, _ = self.board.adjacent_horizontal_values(row, col)
-                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
-                        total_real_connections += 1
-                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        total_real_connections += 1
-
-                if piece == "VD":
-                    up, _ = self.board.adjacent_vertical_values(row, col)
-                    _, right = self.board.adjacent_horizontal_values(row, col)
+                if piece == 'VC':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    left, _ = board.adjacent_horizontal_values(row, col)
                     if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        total_real_connections += 1
-                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
-                        total_real_connections += 1
-
-                if piece == "LH":
-                    left, right = self.board.adjacent_horizontal_values(row, col)
+                        connections.add(((row, col), (row-1, col)))
                     if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        total_real_connections += 1
-                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
-                        total_real_connections += 1
+                        connections.add(((row, col), (row, col-1)))
                 
-                if piece == "LV":
-                    up, down = self.board.adjacent_vertical_values(row, col)
-                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        total_real_connections += 1
+                if piece == 'VB':
+                    _, down = board.adjacent_vertical_values(row, col)
+                    _, right = board.adjacent_horizontal_values(row, col)
                     if down in {"FC","BC","BE","BD","VC","VD","LV"}:
-                        total_real_connections += 1
-        return total_real_connections
+                        connections.add(((row, col), (row+1, col)))
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        connections.add(((row, col), (row, col+1)))
+                
+                if piece == 'VE':
+                    _, down = board.adjacent_vertical_values(row, col)
+                    left, _ = board.adjacent_horizontal_values(row, col)
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        connections.add(((row, col), (row+1, col)))
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        connections.add(((row, col), (row, col-1)))
+                
+                if piece == 'VD':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    _, right = board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        connections.add(((row, col), (row-1, col)))
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        connections.add(((row, col), (row, col+1)))
+                
+                if piece == 'LH':
+                    left, right = board.adjacent_horizontal_values(row, col)
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        connections.add(((row, col), (row, col-1)))
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        connections.add(((row, col), (row, col+1)))
+                
+                if piece == 'LV':
+                    up, down = board.adjacent_vertical_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        connections.add(((row, col), (row-1, col)))
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        connections.add(((row, col), (row+1, col)))
+        
+          
+        unique_connections = {frozenset(conn) for conn in connections}
+        print(len(unique_connections))
+        return len(unique_connections)
 
-    
     # TODO: outros metodos da classe
 
 
@@ -224,9 +230,11 @@ class PipeMania(Problem):
     
     def __init__(self, board: Board):
         """The constructor specifies the initial state."""
+        self.board = board
         initial_state = PipeManiaState(board)
         super().__init__(initial_state)
         self.expected_count = self.count_expected_connections(board)
+
 
     def actions(self, state: PipeManiaState):
         """Retorna uma lista de ações que podem ser executadas a
@@ -241,21 +249,156 @@ class PipeMania(Problem):
         return actions
     
     
-    def count_expected_connections(self, board):
-        piece = {"FC": 1, "FB": 1, "FE": 1, "FD": 1, "BC": 3, "BB": 3, "BE": 3, "BD": 3, "VC": 2, "VB": 2, "VE": 2, "VD": 2, "LH": 2, "LV": 2}
-        piece_counts = {piece: 0 for piece in piece}
+    def count_expected_connections(self,board):
+        pieces = {"FC": 1, "FB": 1, "FE": 1, "FD": 1, "BC": 3, "BB": 3, "BE": 3, "BD": 3, "VC": 2, "VB": 2, "VE": 2, "VD": 2, "LH": 2, "LV": 2}
+        new_board = PipeManiaState.copy_board_with_counts(self,board)
         # Contar peças e calcular o número total de conexões esperadas
         total_expected_connections = 0
         size = board.get_size()
-        # Get unique values and their counts from the board
-        unique_values, counts = np.unique(board.board, return_counts=True)
         
-        # Update piece_counts and total_expected_connections
-        for piece_key, count in zip(unique_values, counts):
-            if piece_key in piece_counts:
-                piece_counts[piece_key] += count
-                total_expected_connections += piece[piece_key] * count  # Use 'piece' instead of 'piece_connections'
-        return total_expected_connections
+        
+        # Calcular o número total de conexões reais
+        for row in range(size):
+            for col in range(size):
+                piece = new_board[row][col][0]
+                count = new_board[row][col][1]        
+                if piece == 'FB':
+                    _, down = board.adjacent_vertical_values(row, col)
+                    if down in {"BC","BE","BD","VC","VD","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                        
+                if piece == 'FC':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    if up in {"BB", "BD", "BE","VB","VE","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'FE':
+                    left, _ = board.adjacent_horizontal_values(row, col)
+                    if left in {"BC","BB","BD","VB","VD","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'FD':
+                    _, right = board.adjacent_horizontal_values(row, col)
+                    if right in {"BC","BB","BE","VC","VE","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                        
+                if piece == 'BC':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    left, right = board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                        
+                    if left in {"BC","FD","BB","BD","VB","VD","LH"}:
+                        new_board[row][col] = (piece, count)
+                    if right in {"BC","FE","BB","BE","VC","VE","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+
+                        
+                if piece == 'BB':
+                    _, down = board.adjacent_vertical_values(row, col)
+                    left, right = board.adjacent_horizontal_values(row, col)
+                    if down in {"BC","FC","BE","BD","VC","VD","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if left in {"BB","BC","BD","FD","VB","VD","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if right in {"BB","BC","BE","FE","VC","VE","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'BE':
+                    up, down = board.adjacent_vertical_values(row, col)
+                    left, _ = board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BE","BB","BD","VB","VE","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if down in {"FC","BC","BD","BE","VC","VD","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'BD':
+                    up, down = board.adjacent_vertical_values(row, col)
+                    _, right = board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BE","BB","BD","VB","VE","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if down in {"FC","BC","BD","BE","VC","VD","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if right in {"BB","BC","BE","FE","VC","VE","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'VC':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    left, _ = board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'VB':
+                    _, down = board.adjacent_vertical_values(row, col)
+                    _, right = board.adjacent_horizontal_values(row, col)
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'VE':
+                    _, down = board.adjacent_vertical_values(row, col)
+                    left, _ = board.adjacent_horizontal_values(row, col)
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'VD':
+                    up, _ = board.adjacent_vertical_values(row, col)
+                    _, right = board.adjacent_horizontal_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'LH':
+                    left, right = board.adjacent_horizontal_values(row, col)
+                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                
+                if piece == 'LV':
+                    up, down = board.adjacent_vertical_values(row, col)
+                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
+                        count += 1
+                        new_board[row][col] = (piece, count)
+        
+                  
+        return 3
     
     
     def rotate_piece(self,piece, clockwise):
@@ -328,9 +471,7 @@ class PipeMania(Problem):
     
     def goal_test(self, state):
         """Retorna True se e só se o estado passado como argumento é
-        um estado objetivo. Deve verificar se todas as posições do tabuleiro
-        estão preenchidas de acordo com as regras do problema."""
-        print("Real count: ", state.real_count)
+        um estado objetivo. Deve verificar se todas as posições do tabuleiro        estão preenchidas de acordo com as regras do problema."""
         return self.expected_count == state.real_count 
     
 
@@ -376,11 +517,13 @@ if __name__ == "__main__":
 
 '''
 
-'''
+
 board = Board.parse_instance()
 # Criar uma instância de PipeMania:
 problem = PipeMania(board)
+
 # Criar um estado com a configuração inicial:
+
 s0 = PipeManiaState(board)
 # Aplicar as ações que resolvem a instância
 s1 = problem.result(s0, (0, 1, True))
@@ -398,9 +541,10 @@ s11 = problem.result(s10, (2, 2, True))
 print("Is goal?", problem.goal_test(s5))
 print("Is goal?", problem.goal_test(s11))
 print("Solution:\n", s11.board.print(), sep="")
+
+
+
 '''
-
-
 board = Board.parse_instance()
 # Criar uma instância de PipeMania:
 problem = PipeMania(board)
@@ -408,4 +552,4 @@ problem = PipeMania(board)
 goal_node = depth_first_tree_search(problem)
 # Verificar se foi atingida a solução
 print("Is goal?", problem.goal_test(goal_node.state))
-print("Solution:\n", goal_node.state.board.print(), sep="")
+print("Solution:\n", goal_node.state.board.print(), sep="")'''
