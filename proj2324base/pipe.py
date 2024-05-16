@@ -23,14 +23,13 @@ from search import (
 
 class PipeManiaState:
     state_id = 0
-    path = []
+
     
     def __init__(self, board):
         self.board = board
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
-        self.real_count = self.count_real_connections(board)
-        self.path = []
+        self.real_count = self.count_real_connections(board) * 2
        
         
     def __lt__(self, other):
@@ -45,7 +44,7 @@ class PipeManiaState:
         
         for row in range(size):
             for col in range(size):
-                piece = board.get_piece(row, col)
+                piece = self.board.get_piece(row, col)
             
                 if piece == 'FB':
                     _, down = board.adjacent_vertical_values(row, col)
@@ -155,7 +154,6 @@ class PipeManiaState:
         
           
         unique_connections = {frozenset(conn) for conn in connections}
-        print(len(unique_connections))
         return len(unique_connections)
 
     # TODO: outros metodos da classe
@@ -164,12 +162,10 @@ class PipeManiaState:
 class Board:
     """Representação interna de um tabuleiro de PipeMania."""
 
+
     def __init__(self,board_input,size):
         self.board = np.array(board_input,dtype=str)
-        self.pieces = {"FC","FB","FE","FD","BC","BB",
-                       "BE","BD","VC","VB","VE","VD","LH","LV"}
-        self.path = []
-        
+
 
     def adjacent_vertical_values(self, row: int, col: int):
         """Devolve os valores imediatamente acima e abaixo,
@@ -194,6 +190,7 @@ class Board:
     def get_value(self, row: int, col: int):
         """Devolve o valor na respetiva posição do tabuleiro."""
         return self.board[row][col]
+    
     
     @staticmethod
     def parse_instance():
@@ -228,12 +225,13 @@ class Board:
 
 class PipeMania(Problem):
     
+    
     def __init__(self, board: Board):
         """The constructor specifies the initial state."""
         self.board = board
         initial_state = PipeManiaState(board)
         super().__init__(initial_state)
-        self.expected_count = self.count_expected_connections(board)
+        self.expected_count = self.expected_connections(board)
 
 
     def actions(self, state: PipeManiaState):
@@ -247,159 +245,7 @@ class PipeMania(Problem):
                 actions.append((row, col, True))
                 actions.append((row, col, False))
         return actions
-    
-    
-    def count_expected_connections(self,board):
-        pieces = {"FC": 1, "FB": 1, "FE": 1, "FD": 1, "BC": 3, "BB": 3, "BE": 3, "BD": 3, "VC": 2, "VB": 2, "VE": 2, "VD": 2, "LH": 2, "LV": 2}
-        new_board = PipeManiaState.copy_board_with_counts(self,board)
-        # Contar peças e calcular o número total de conexões esperadas
-        total_expected_connections = 0
-        size = board.get_size()
         
-        
-        # Calcular o número total de conexões reais
-        for row in range(size):
-            for col in range(size):
-                piece = new_board[row][col][0]
-                count = new_board[row][col][1]        
-                if piece == 'FB':
-                    _, down = board.adjacent_vertical_values(row, col)
-                    if down in {"BC","BE","BD","VC","VD","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                        
-                if piece == 'FC':
-                    up, _ = board.adjacent_vertical_values(row, col)
-                    if up in {"BB", "BD", "BE","VB","VE","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'FE':
-                    left, _ = board.adjacent_horizontal_values(row, col)
-                    if left in {"BC","BB","BD","VB","VD","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'FD':
-                    _, right = board.adjacent_horizontal_values(row, col)
-                    if right in {"BC","BB","BE","VC","VE","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                        
-                if piece == 'BC':
-                    up, _ = board.adjacent_vertical_values(row, col)
-                    left, right = board.adjacent_horizontal_values(row, col)
-                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                        
-                    if left in {"BC","FD","BB","BD","VB","VD","LH"}:
-                        new_board[row][col] = (piece, count)
-                    if right in {"BC","FE","BB","BE","VC","VE","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-
-                        
-                if piece == 'BB':
-                    _, down = board.adjacent_vertical_values(row, col)
-                    left, right = board.adjacent_horizontal_values(row, col)
-                    if down in {"BC","FC","BE","BD","VC","VD","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if left in {"BB","BC","BD","FD","VB","VD","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if right in {"BB","BC","BE","FE","VC","VE","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'BE':
-                    up, down = board.adjacent_vertical_values(row, col)
-                    left, _ = board.adjacent_horizontal_values(row, col)
-                    if up in {"FB","BE","BB","BD","VB","VE","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if down in {"FC","BC","BD","BE","VC","VD","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'BD':
-                    up, down = board.adjacent_vertical_values(row, col)
-                    _, right = board.adjacent_horizontal_values(row, col)
-                    if up in {"FB","BE","BB","BD","VB","VE","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if down in {"FC","BC","BD","BE","VC","VD","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if right in {"BB","BC","BE","FE","VC","VE","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'VC':
-                    up, _ = board.adjacent_vertical_values(row, col)
-                    left, _ = board.adjacent_horizontal_values(row, col)
-                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'VB':
-                    _, down = board.adjacent_vertical_values(row, col)
-                    _, right = board.adjacent_horizontal_values(row, col)
-                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'VE':
-                    _, down = board.adjacent_vertical_values(row, col)
-                    left, _ = board.adjacent_horizontal_values(row, col)
-                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'VD':
-                    up, _ = board.adjacent_vertical_values(row, col)
-                    _, right = board.adjacent_horizontal_values(row, col)
-                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'LH':
-                    left, right = board.adjacent_horizontal_values(row, col)
-                    if left in {"FD","BC","BB","BD","VB","VD","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if right in {"FE","BC","BB","BE","VC","VE","LH"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                
-                if piece == 'LV':
-                    up, down = board.adjacent_vertical_values(row, col)
-                    if up in {"FB","BB","BE","BD","VB","VE","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-                    if down in {"FC","BC","BE","BD","VC","VD","LV"}:
-                        count += 1
-                        new_board[row][col] = (piece, count)
-        
-                  
-        return 3
-    
     
     def rotate_piece(self,piece, clockwise):
         
@@ -469,28 +315,117 @@ class PipeMania(Problem):
         return new_state
     
     
+    def expected_connections(self, board):
+        """Calcula o número de conexões esperadas para o tabuleiro dado sem duplicação."""
+        size = board.get_size()
+        connections = set()
+        
+        # Definição das direções para facilitar a verificação de conexões
+        directions = {
+            'C': (-1, 0),  # up
+            'B': (1, 0),   # down
+            'E': (0, -1),  # left
+            'D': (0, 1)    # right
+        }
+        
+        def is_valid_position(x, y):
+            return 0 <= x < size and 0 <= y < size
+
+        for row in range(size):
+            for col in range(size):
+                piece = board.get_piece(row, col)
+                
+                if piece.startswith('F'):
+                    dir = piece[1]
+                    dr, dc = directions[dir]
+                    nr, nc = row + dr, col + dc
+                    if is_valid_position(nr, nc):
+                        connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'BC':
+                    for dir in ['C', 'E', 'D']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'BB':
+                    for dir in ['B', 'E', 'D']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'BE':
+                    for dir in ['C', 'B', 'E']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'BD':
+                    for dir in ['C', 'B', 'D']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'VC':
+                    for dir in ['C', 'E']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'VB':
+                    for dir in ['B', 'D']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'VE':
+                    for dir in ['B', 'E']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'VD':
+                    for dir in ['C', 'D']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'LH':
+                    for dir in ['E', 'D']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+                elif piece == 'LV':
+                    for dir in ['C', 'B']:
+                        dr, dc = directions[dir]
+                        nr, nc = row + dr, col + dc
+                        if is_valid_position(nr, nc):
+                            connections.add(frozenset([(row, col), (nr, nc)]))
+
+        return len(connections)
+
+
     def goal_test(self, state):
         """Retorna True se e só se o estado passado como argumento é
-        um estado objetivo. Deve verificar se todas as posições do tabuleiro        estão preenchidas de acordo com as regras do problema."""
-        return self.expected_count == state.real_count 
+        um estado objetivo. Deve verificar se todas as posições do tabuleiro 
+        estão preenchidas de acordo com as regras do problema."""
+        return self.expected_connections(board) == state.real_count
     
 
     def h(self, node: Node):
         """Heuristic function used for A* search."""
-        # Get the current state
-        state = node.state
-
-        # Initialize count of pieces that need to be rotated
-        count = 0
-
-        # Iterate over each piece in the board
-        for row in range(state.board.shape[0]):
-            for col in range(state.board.shape[1]):
-                # If the piece needs to be rotated, increment the count
-                if self.needs_rotation(state.board[row][col]):
-                    count += 1
-
-        return count
+        
+        return 1
     
     
     def print(self):
@@ -517,39 +452,3 @@ if __name__ == "__main__":
 
 '''
 
-
-board = Board.parse_instance()
-# Criar uma instância de PipeMania:
-problem = PipeMania(board)
-
-# Criar um estado com a configuração inicial:
-
-s0 = PipeManiaState(board)
-# Aplicar as ações que resolvem a instância
-s1 = problem.result(s0, (0, 1, True))
-s2 = problem.result(s1, (0, 1, True))
-s3 = problem.result(s2, (0, 2, True))
-s4 = problem.result(s3, (0, 2, True))
-s5 = problem.result(s4, (1, 0, True))
-s6 = problem.result(s5, (1, 1, True))
-s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (exemplo de uso)
-s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (exemplo de uso)
-s9 = problem.result(s8, (2, 1, True))
-s10 = problem.result(s9, (2, 1, True))
-s11 = problem.result(s10, (2, 2, True))
-# Verificar se foi atingida a solução
-print("Is goal?", problem.goal_test(s5))
-print("Is goal?", problem.goal_test(s11))
-print("Solution:\n", s11.board.print(), sep="")
-
-
-
-'''
-board = Board.parse_instance()
-# Criar uma instância de PipeMania:
-problem = PipeMania(board)
-# Obter o nó solução usando a procura em profundidade:
-goal_node = depth_first_tree_search(problem)
-# Verificar se foi atingida a solução
-print("Is goal?", problem.goal_test(goal_node.state))
-print("Solution:\n", goal_node.state.board.print(), sep="")'''
