@@ -8,7 +8,7 @@
 
 from sys import stdin
 import numpy as np
-import copy
+import copy 
 from search import Problem
 from search import (
     Problem,
@@ -23,7 +23,6 @@ from search import (
 
 class PipeManiaState:
     state_id = 0
-
     
     def __init__(self, board):
         self.board = board
@@ -32,11 +31,15 @@ class PipeManiaState:
         self.real_count = self.count_real_connections(board)
         
         
-        
+          
     def __lt__(self, other):
         return self.id < other.id
     
     
+    def __str__(self):
+        return self.board.print()
+   
+   
     def count_real_connections(self,board):
         
         # Contar peças e calcular o número total de conexões esperadas
@@ -151,6 +154,7 @@ class PipeManiaState:
                         connections.add(frozenset((((row, col), (row-1, col)))))
                     if down in {"FC","BC","BE","BD","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+        #print(connections)
         return len(connections)
 
 
@@ -166,18 +170,18 @@ class Board:
 
 
     def adjacent_vertical_values(self, row: int, col: int):
-        """Devolve os valores imediatamente acima e abaixo,
-        respectivamente."""
-        above = self.board[row - 1][col] if row > 0 else None
-        below = self.board[row + 1][col] if row < self.board.shape[0] - 1 else None
+        """Devolve os valores imediatamente acima e abaixo, respectivamente."""
+        size = self.get_size()
+        above = self.board[row - 1, col] if row > 0 else None
+        below = self.board[row + 1, col] if row < size - 1 else None
         return above, below
 
 
     def adjacent_horizontal_values(self, row: int, col: int):
-        """Devolve os valores imediatamente à esquerda e à direita,
-        respectivamente."""
-        left = self.board[row][col - 1] if col > 0 else None
-        right = self.board[row][col + 1] if col < self.board.shape[1] - 1 else None
+        """Devolve os valores imediatamente à esquerda e à direita, respectivamente."""
+        size = self.get_size()
+        left = self.board[row, col - 1] if col > 0 else None
+        right = self.board[row, col + 1] if col < size - 1 else None
         return left, right
 
 
@@ -202,6 +206,8 @@ class Board:
         # Create a Board object
         board_obj = Board(board, board.shape[0])
 
+        state = PipeManiaState(board_obj)
+        
         return board_obj
 
 
@@ -228,21 +234,22 @@ class PipeMania(Problem):
         """The constructor specifies the initial state."""
         self.board = board
         initial_state = PipeManiaState(board)
-        self.state = initial_state
         super().__init__(initial_state)
-        self.max_connections = 0 
+        self.expected_connections = self.expected_connections_calc(board)
+        self.visited_states = set()
         
-        
-    def actions(self, state: PipeManiaState):
-        """Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento."""
-        size = board.get_size()
+         
+    def actions(self, state):
+        # Initialize an empty list to store the actions
         actions = []
-        for row in range(size):
-            for col in range(size):
-                # Add actions to rotate the piece at (row, col) in both directions
-                actions.append((row, col, True))
-                actions.append((row, col, False))
+        # For each piece on the board...
+        for row in range(state.board.get_size()):
+            for col in range(state.board.get_size()):
+                # For each possible rotation...
+                for clockwise in [True, False]:
+                    # Add the action to the list
+                    actions.append((row, col, clockwise))
+        # Return the list of actions
         return actions
         
     
@@ -274,7 +281,7 @@ class PipeMania(Problem):
             return "BC" if clockwise else "BB"
         
         if(piece == "VC"):
-            return "VD" if clockwise else "VE"
+            return "VB" if clockwise else "VE"
         
         if(piece == "VD"):
             return "VB" if clockwise else "VC"
@@ -286,49 +293,81 @@ class PipeMania(Problem):
             return "VC" if clockwise else "VB"
         
         if(piece == "LH"):
-            return "LV" if clockwise else "LH"
+            return "LV" if clockwise else "LV"
         
         if(piece == "LV"):
-            return "LH" if clockwise else "LV"
+            return "LH" if clockwise else "LH"
     
-    
-    def result(self, state: PipeManiaState, action):
-        # Create a deep copy of the current state's board
-        new_board = copy.deepcopy(state.board)
 
+    def result(self, state: PipeManiaState, action):
         # Unpack the action
         row, col, clockwise = action
+        
+        # Create a new instance of PipeManiaState with a deep copy of the board
+        new_state = PipeManiaState(board=copy.deepcopy(state.board))
+        
+        if new_state.id in self.visited_states:
+            return None
+        
+        # Increment the id of the old state
+        state.id += 1
+
+        # Set the id of the new state
+        new_state.id = state.id
+
+        # Copy the real_count from the old state to the new state
+        new_state.real_count = state.real_count
 
         # Get the piece at the specified coordinates
-        piece = new_board.get_piece(row, col)
+        piece = new_state.board.get_piece(row, col)
 
         # Rotate the piece
         rotated_piece = self.rotate_piece(piece, clockwise)
 
         # Set the rotated piece at the specified coordinates
-        new_board.set_piece(row, col, rotated_piece)
+        new_state.board.set_piece(row, col, rotated_piece)
 
-        # Create a new state with the updated board
-        new_state = PipeManiaState(new_board)
-    
+        # Update real_count
+        new_state.real_count = new_state.count_real_connections(new_state.board)
+
+        # Update self.board
+        self.board = copy.deepcopy(new_state.board)
+
+        self.visited_states.add(new_state)
+        #print("r",new_state.id,"result",new_state.real_count,"\n",sep="")
         return new_state
+   
+   
+    def expected_connections_calc(self, board):
+        # Contar peças e calcular o número total de conexões esperadas
+        size = board.get_size()
+        connections = 0
+        for row in range(size):
+            for col in range(size):
+                piece = board.get_piece(row, col)
+                if piece in {'FB', 'FC','FD','FE'}:
+                    connections +=1 
+                        
+                if piece in {'BC', 'BB','BE','BD'}:
+                    connections += 3
+                    
+                if piece in {'VC', 'VB','VE','VD','LH','LV'}:
+                    connections += 2
+        
+        return int(connections/2)
     
     
-    def expected_connections(self, board):
-        return self.max_connections
-    
-    
-    def goal_test(self, state : PipeManiaState):
+    def goal_test(self, state: PipeManiaState):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do board 
-        estão preenchidas de acordo com as regras do problema."""
-        return self.max_connections == state.real_count
+        estão preenchidas de acordox com as regras do problema."""
+        return state.real_count == self.expected_connections
     
 
     def h(self, node: Node):
         """Heuristic function used for A* search."""
         current_state = node.state
-        return abs(self.expected_connections(board) - current_state.real_count)
+        return abs(self.expected_connections - current_state.real_count)
     
     
     def print(self):
@@ -337,12 +376,14 @@ class PipeMania(Problem):
     # TODO: outros metodos da classe
 
 
-board = Board.parse_instance()
-# Criar uma instância de PipeMania:
-problem = PipeMania(board)
-print(board.print())
-# Obter o nó solução usando a procura em profundidade:
-goal_node = depth_first_tree_search(problem)
-# Verificar se foi atingida a solução
-print("Is goal?", problem.goal_test(goal_node.state))
-print("Solution:\n", goal_node.state.board.print(), sep="")
+if __name__ == "__main__":
+    # Parse the instance
+    board = Board.parse_instance()
+    # Create a PipeMania object
+    pipe_mania = PipeMania(board)
+    # Solve the problem using A* search
+    solution = breadth_first_tree_search(pipe_mania)
+    # Print the solution
+    print(solution.solution())
+    print(solution.path_cost)
+
