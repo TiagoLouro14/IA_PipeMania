@@ -4,7 +4,7 @@
 
 # Grupo 11:
 # 104101 Tiago Queiroz de Orduña Dores Louro
-# 103562 Guilherme Neca Ribeiro
+
 
 from sys import stdin
 import numpy as np
@@ -29,7 +29,6 @@ class PipeManiaState:
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
    
-        
             
     def __lt__(self, other):
         return self.id < other.id
@@ -113,225 +112,371 @@ class Board:
         
         # Contar peças e calcular o número total de conexões esperadas
         size = len(self.board)
-        connections = set()    
+        connections = set()
+        pieces_connections = {}   
         for row in range(size):
             for col in range(size):
                 piece = self.board[row, col]
-            
+                if piece not in pieces_connections:
+                    pieces_connections[piece] = 0
                 if piece == 'FB':
                     _, down = self.adjacent_vertical_values(row, col)
                     if down in {"BC","BE","BD","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+                        pieces_connections[piece] += 1
+                        
                         
                 if piece == 'FC':
                     up, _ = self.adjacent_vertical_values(row, col)
                     if up in {"BB", "BD", "BE","VB","VE","LV"}:
                         connections.add(frozenset((((row, col), (row-1, col)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'FE':
                     left, _ = self.adjacent_horizontal_values(row, col)
                     if left in {"BC","BB","BD","VB","VD","LH"}:
                         connections.add(frozenset((((row, col), (row, col-1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'FD':
                     _, right = self.adjacent_horizontal_values(row, col)
                     if right in {"BC","BB","BE","VC","VE","LH"}:
                         connections.add(frozenset((((row, col), (row, col+1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'BC':
                     up, _ = self.adjacent_vertical_values(row, col)
                     left, right = self.adjacent_horizontal_values(row, col)
                     if up in {"FB","BB","BE","BD","VB","VE","LV"}:
                         connections.add(frozenset((((row, col), (row-1, col)))))
+                        pieces_connections[piece] += 1
                     if left in {"BC","FD","BB","BD","VB","VD","LH"}:
                         connections.add(frozenset((((row, col), (row, col-1)))))
+                        pieces_connections[piece] += 1
                     if right in {"BC","FE","BB","BE","VC","VE","LH"}:
                         connections.add(frozenset((((row, col), (row, col+1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'BB':
                     _, down = self.adjacent_vertical_values(row, col)
                     left, right = self.adjacent_horizontal_values(row, col)
                     if down in {"BC","FC","BE","BD","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+                        pieces_connections[piece] += 1
                     if left in {"BB","BC","BD","FD","VB","VD","LH"}:
                         connections.add(frozenset((((row, col), (row, col-1)))))
+                        pieces_connections[piece] += 1
                     if right in {"BB","BC","BE","FE","VC","VE","LH"}:
                         connections.add(frozenset((((row, col), (row, col+1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'BE':
                     up, down = self.adjacent_vertical_values(row, col)
                     left, _ = self.adjacent_horizontal_values(row, col)
                     if up in {"FB","BE","BB","BD","VB","VE","LV"}:
                         connections.add(frozenset((((row, col), (row-1, col)))))
+                        pieces_connections[piece] += 1
                     if down in {"FC","BC","BD","BE","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+                        pieces_connections[piece] += 1
                     if left in {"FD","BC","BB","BD","VB","VD","LH"}:
                         connections.add(frozenset((((row, col), (row, col-1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'BD':
                     up, down = self.adjacent_vertical_values(row, col)
                     _, right = self.adjacent_horizontal_values(row, col)
                     if up in {"FB","BE","BB","BD","VB","VE","LV"}:
                         connections.add(frozenset((((row, col), (row-1, col)))))
+                        pieces_connections[piece] += 1
                     if down in {"FC","BC","BD","BE","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+                        pieces_connections[piece] += 1
                     if right in {"BB","BC","BE","FE","VC","VE","LH"}:
                         connections.add(frozenset((((row, col), (row, col+1)))))
+                        pieces_connections[piece] += 1
                         
                 if piece == 'VC':
                     up, _ = self.adjacent_vertical_values(row, col)
                     left, _ = self.adjacent_horizontal_values(row, col)
                     if up in {"FB","BB","BE","BD","VB","VE","LV"}:
                         connections.add(frozenset((((row, col), (row-1, col)))))
+                        pieces_connections[piece] += 1
                     if left in {"FD","BC","BB","BD","VB","VD","LH"}:
                         connections.add(frozenset((((row, col), (row, col-1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'VB':
                     _, down = self.adjacent_vertical_values(row, col)
                     _, right = self.adjacent_horizontal_values(row, col)
                     if down in {"FC","BC","BE","BD","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+                        pieces_connections[piece] += 1
                     if right in {"FE","BC","BB","BE","VC","VE","LH"}:
                         connections.add(frozenset((((row, col), (row, col+1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'VE':
                     _, down = self.adjacent_vertical_values(row, col)
                     left, _ = self.adjacent_horizontal_values(row, col)
                     if down in {"FC","BC","BE","BD","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+                        pieces_connections[piece] += 1
                     if left in {"FD","BC","BB","BD","VB","VD","LH"}:
                         connections.add(frozenset((((row, col), (row, col-1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'VD':
                     up, _ = self.adjacent_vertical_values(row, col)
                     _, right = self.adjacent_horizontal_values(row, col)
                     if up in {"FB","BB","BE","BD","VB","VE","LV"}:
                         connections.add(frozenset((((row, col), (row-1, col)))))
+                        pieces_connections[piece] += 1
                     if right in {"FE","BC","BB","BE","VC","VE","LH"}:
                         connections.add(frozenset((((row, col), (row, col+1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'LH':
                     left, right = self.adjacent_horizontal_values(row, col)
                     if left in {"FD","BC","BB","BD","VB","VD","LH"}:
                         connections.add(frozenset((((row, col), (row, col-1)))))
+                        pieces_connections[piece] += 1
                     if right in {"FE","BC","BB","BE","VC","VE","LH"}:
                         connections.add(frozenset((((row, col), (row, col+1)))))
+                        pieces_connections[piece] += 1
                 
                 if piece == 'LV':
                     up, down = self.adjacent_vertical_values(row, col)
                     if up in {"FB","BB","BE","BD","VB","VE","LV"}:
                         connections.add(frozenset((((row, col), (row-1, col)))))
+                        pieces_connections[piece] += 1
                     if down in {"FC","BC","BE","BD","VC","VD","LV"}:
                         connections.add(frozenset((((row, col), (row+1, col)))))
+                        pieces_connections[piece] += 1
         
-        return len(connections)
-    # TODO: outros metodos da classe
+        return len(connections), [(piece, count) for piece, count in pieces_connections.items()]
+    
 
 
 class PipeMania(Problem):
     
-    
-    def __init__(self, board: Board):
-        """The constructor specifies the initial state."""
+    def __init__(self, board):
         initial_state = PipeManiaState(board)
         super().__init__(initial_state)
         self.expected_connections = self.expected_connections_calc(board)   
          
+        
+        
+    def count_unconnected_pipes(self, board):
+        state = PipeManiaState(board)
+        board = state.board
+        unconnected_pipes = 0
+        # Get the real connections for each piece
+        _, connections = board.count_real_connections()
+        
+        for piece, count in connections:
+            if piece in {'FB', 'FC','FD','FE'}:
+                if count < 1:
+                    unconnected_pipes += 1
+            if piece in {'BC', 'BB','BE','BD'}:
+                if count < 3:
+                    unconnected_pipes += 1
+            if piece in {'VC', 'VB','VE','VD','LH','LV'}:
+                if count < 2:
+                    unconnected_pipes += 1
+                    
+        return unconnected_pipes
+
+    
          
     def actions(self, state):
         # Initialize an empty list to store the actions
         actions = []
-        board = state.board  
+        board = state.board
         size = board.get_size()
         
+        # Use a set for actions for faster membership checking
+        middle_actions = set()
+        
+        # middle pieces
+        transformations = {
+            'VB': {'VC', 'VD', 'VE'},
+            'VC': {'VB', 'VD', 'VE'},
+            'VD': {'VB', 'VC', 'VE'},
+            'VE': {'VB', 'VC', 'VD'},
+            'FB': {'FC', 'FD', 'FE'},
+            'FC': {'FB', 'FD', 'FE'},
+            'FD': {'FB', 'FC', 'FE'},
+            'FE': {'FB', 'FC', 'FD'},
+            'BB': {'BC', 'BD', 'BE'},
+            'BC': {'BB', 'BD', 'BE'},
+            'BD': {'BB', 'BC', 'BE'},
+            'BE': {'BB', 'BC', 'BD'},
+            'LH': {'LV'},
+            'LV': {'LH'}
+        }
+          
         # For each possible rotation...
         for row in range(size):
             for col in range(size):
+                
+                # Get the piece in the current position
                 piece = board[row][col]
                 
-                # Initialize all possible actions for this piece
-                piece_actions = [(row, col, 90), (row, col, 180), (row, col, 270)]
-                
                 # Filter actions based on piece type and position
-                if row == 0 and col == 0:  # top-left corner
-                    if piece in {'FB', 'FD'}:
-                        piece_actions.remove((row, col, 90))
-                        piece_actions.remove((row, col, 180))
+                
+                # top-left corner
+                if row == 0 and col == 0:  
+                    if piece == 'FB':
+                        board.set_piece(row, col, 'FD')
+                    elif piece == 'FD':
+                        board.set_piece(row, col, 'FB')
+                    elif piece == 'FC':
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FB'))
+                    elif piece == 'FE':
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FB'))                    
+                    elif piece in {'VC', 'VD', 'VE'}:
+                        board.set_piece(row, col, 'VB')  
+
+                # bottom-left corner
+                elif row == size - 1 and col == 0:
                     if piece == 'FC':
-                        piece_actions.remove((row, col, 270))
-                    if piece == 'FD':
-                        piece_actions.remove((row, col, 270))
-                    if piece == 'FE':
-                        piece_actions.remove((row, col, 90))
-                    if piece == 'VB':
-                        piece_actions = []
-                    if piece in {'VC', 'VD', 'VE'}:
-                        board.set_piece(row, col, 'VB')
-                        piece_actions = []
-
-                if row == size - 1 and col == 0:  # bottom-left corner
-                    if piece == 'VD':
-                        piece_actions = []
-                    if piece in {'VB', 'VC', 'VE'}:
+                        board.set_piece(row, col, 'FD')
+                    elif piece == 'FD':
+                        board.set_piece(row, col, 'FC')
+                    elif piece == 'FE':
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FC'))
+                    elif piece == 'FB':
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FC'))
+                    elif piece in {'VB', 'VC', 'VE'}:
                         board.set_piece(row, col, 'VD')
-                        piece_actions = []
-
-                if row == 0 and col == size - 1:  # top-right corner
-                    if piece == 'VE':
-                        piece_actions = []
-                    if piece in {'VC', 'VB', 'VD'}:
+                    
+                # top-right corner
+                elif row == 0 and col == size - 1:  
+                    if piece == 'FB':
+                        board.set_piece(row, col, 'FE')
+                    elif piece == 'FE':
+                        board.set_piece(row, col, 'FB')
+                    elif piece == 'FC':
+                        actions.append((row, col, 'FB'))
+                        actions.append((row, col, 'FE'))
+                    elif piece == 'FD':
+                        actions.append((row, col, 'FB'))
+                        actions.append((row, col, 'FE'))  
+                    elif piece in {'VC', 'VB', 'VD'}:
                         board.set_piece(row, col, 'VE')
-                        piece_actions = []
-
-                if row == size - 1 and col == size - 1:  # bottom-right corner
-                    if piece == 'VC':
-                        piece_actions = []
-                    if piece in {'VB', 'VE'}:
+                      
+                # bottom-right corner
+                elif row == size - 1 and col == size - 1: 
+                    if piece == 'FC':
+                        board.set_piece(row, col, 'FE')
+                    elif piece == 'FE':
+                        board.set_piece(row, col, 'FC')
+                    elif piece == 'FD':
+                        actions.append((row, col, 'FE'))
+                        actions.append((row, col, 'FC'))
+                    elif piece == 'FB':
+                        actions.append((row, col, 'FC'))
+                        actions.append((row, col, 'FE')) 
+                    elif piece in {'VB', 'VE','VD'}:
                         board.set_piece(row, col, 'VC')
-                        piece_actions = []
-
-                if row == 0 and 0 < col < size - 1 and size > 1:  # top row, not corners
-                    if piece in {'LV', 'BB', 'BC'}:
+                        
+                # top row, not corners
+                elif row == 0 and 0 < col < size - 1 and size > 2:
+                    if piece in {'VD','VC'}:
+                        actions.append((row, col, 'VB'))
+                        actions.append((row, col, 'VE'))
+                    elif piece == 'VB':
+                        board.set_piece(row, col, 'VC')
+                    elif piece == 'VE':
+                        board.set_piece(row, col, 'VD')
+                    elif piece == 'FC':
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FB'))
+                        actions.append((row, col, 'FE'))
+                    elif piece in {'FD', 'FB', 'FE'}:
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FB'))
+                        actions.append((row, col, 'FE'))
+                    elif piece in {'BD', 'BE', 'BC'}:
                         board.set_piece(row, col, 'BB')
-                        piece_actions = []
-                    if piece == 'LH':
-                        piece_actions = []
-
-                if row == size - 1 and 0 < col < size - 1 and size > 1:  # bottom row, not corners
-                    if piece in {'LV', 'BC', 'BB'}:
+                    elif piece == 'LV':
+                        board.set_piece(row, col, 'LH')
+                        
+                # bottom row, not corners
+                elif row == size - 1 and 0 < col < size - 1 and size > 2:
+                    if piece in {'VE','VB'}:
+                        actions.append((row, col, 'VC'))
+                        actions.append((row, col, 'VD'))
+                    elif piece == 'VC':
+                        board.set_piece(row, col, 'VD')
+                    elif piece == 'VD':
+                        board.set_piece(row, col, 'VC')
+                    elif piece == 'FB':
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FC'))
+                        actions.append((row, col, 'FE'))
+                    elif piece in {'FD', 'FC', 'FE'}:
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FC'))
+                        actions.append((row, col, 'FE'))   
+                    elif piece in {'BD', 'BE', 'BB'}:
                         board.set_piece(row, col, 'BC')
-                        piece_actions = []
-                    if piece == 'LH':
-                        piece_actions = []
-
-                if col == 0 and 0 < row < size - 1 and size > 1:  # left column, not corners
-                    if piece == 'LV':
-                        piece_actions = []
-                    if piece == 'LH':
+                    elif piece == 'LV':
+                        board.set_piece(row, col, 'LH')
+                        
+                # left side, not corners
+                elif col == 0 and 0 < row < size - 1 and size > 2:
+                    if piece in {'VC','VE'}:
+                        actions.append((row, col, 'VB'))
+                        actions.append((row, col, 'VD'))
+                    elif piece == 'FE':
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FC'))
+                        actions.append((row, col, 'FB'))
+                    elif piece in {'FD', 'FB', 'FC'}:
+                        actions.append((row, col, 'FD'))
+                        actions.append((row, col, 'FB'))
+                        actions.append((row, col, 'FC'))
+                    elif piece == 'LH':
                         board.set_piece(row, col, 'LV')
-                        piece_actions = []
-                    if piece == 'BD':
-                        piece_actions = []
-                    if piece in {'BC', 'BB', 'BE'}:
+                    elif piece in {'BC', 'BB', 'BE'}:
                         board.set_piece(row, col, 'BD')
-                        piece_actions = []
-
-                if col == size - 1 and 0 < row < size - 1 and size > 1:  # right column, not corners
-                    if piece == 'LV':
-                        piece_actions = []
-                    if piece == 'LH':
+                        
+                # right side, not corners
+                elif col == size - 1 and 0 < row < size - 1 and size > 2:
+                    if piece in {'VD','VB'}:
+                        actions.append((row, col, 'VC'))
+                        actions.append((row, col, 'VE'))  
+                    elif piece == 'FD':
+                        actions.append((row, col, 'FE'))
+                        actions.append((row, col, 'FC'))
+                        actions.append((row, col, 'FB'))
+                    elif piece in {'FE', 'FC', 'FB'}:
+                        actions.append((row, col, 'FE'))
+                        actions.append((row, col, 'FC'))
+                        actions.append((row, col, 'FB'))
+                    elif piece == 'LH':
                         board.set_piece(row, col, 'LV')
-                        piece_actions = []
-                    if piece == 'BE':
-                        piece_actions = []
-                    if piece in {'BC', 'BB', 'BD'}:
+                    elif piece in {'BC', 'BB', 'BD'}:
                         board.set_piece(row, col, 'BE')
-                        piece_actions = []
 
-                # Add valid actions for the piece to the actions list
-                actions.extend(piece_actions)
+                
+                elif 0 < row < size - 1 and 0 < col < size - 1 and size > 2:
+                    if piece in transformations:
+                        for new_piece in transformations[piece]:
+                            action = (row, col, new_piece)
+                            middle_actions.add(action)  # Add to the intermediate set
+                            
+        # Extend the actions list with the intermediate actions
+        actions.extend(list(middle_actions))                     
+        print(actions)
         
-        # Return the list of actions
+        #Return the list of actions
         return actions
 
     
@@ -340,130 +485,17 @@ class PipeMania(Problem):
         new_board = copy.deepcopy(state.board)
             
         # Unpack the action
-        row, col, clockwise = action
-               
+        row, col, piece = action
+        
+        #print("antes:\n",state.board.print(),"\n",sep="")
+        new_board.set_piece(row, col, piece)
+        
         new_state = PipeManiaState(new_board)
         
-        new_board[row][col] =  self.rotate_piece(new_board.get_piece(row, col), clockwise)       
-        print(new_state.board.print(),"\n",sep="")
+        
+        #print("depois;\n",new_state.board.print(),"\n",sep="")
         return new_state
     
-    
-    def rotate_piece(self,piece, rotation):
-        
-        """Rotate the given piece in the specified direction."""
-        if(piece == "FC"):
-            if rotation == 90:
-                return "FD"
-            if rotation == 180:
-                return "FE"
-            if rotation == 270:
-                return "FB"
-        
-        if(piece == "FD"):
-            if rotation == 90:
-                return "FE"
-            if rotation == 180:
-                return "FB"
-            if rotation == 270:
-                return "FC"
-        
-        if(piece == "FE"):
-            if rotation == 90:
-                return "FB"
-            if rotation == 180:
-                return "FC"
-            if rotation == 270:
-                return "FD"
-        
-        if(piece == "FB"):
-            if rotation == 90:
-                return "FC"
-            if rotation == 180:
-                return "FD"
-            if rotation == 270:
-                return "FE"
-        
-        if(piece == "BC"):
-            if rotation == 90:
-                return "BD"
-            if rotation == 180:
-                return "BE"
-            if rotation == 270:
-                return "BB"
-        
-        if(piece == "BD"):
-            if rotation == 90:
-                return "BE"
-            if rotation == 180:
-                return "BB"
-            if rotation == 270:
-                return "BC"
-        
-        if(piece == "BE"):
-            if rotation == 90:
-                return "BB"
-            if rotation == 180:
-                return "BC"
-            if rotation == 270:
-                return "BD"
-        
-        if(piece == "BB"):
-            if rotation == 90:
-                return "BC"
-            if rotation == 180:
-                return "BD"
-            if rotation == 270:
-                return "BE"
-        
-        if(piece == "VC"):
-            if rotation == 90:
-                return "VD"
-            if rotation == 180:
-                return "VE"
-            if rotation == 270:
-                return "VB"
-        
-        if(piece == "VD"):
-            if rotation == 90:
-                return "VE"
-            if rotation == 180:
-                return "VB"
-            if rotation == 270:
-                return "VC"
-        
-        if(piece == "VE"):
-            if rotation == 90:
-                return "VB"
-            if rotation == 180:
-                return "VC"
-            if rotation == 270:
-                return "VD"
-        
-        if(piece == "VB"):
-            if rotation == 90:
-                return "VC"
-            if rotation == 180:
-                return "VD"
-            if rotation == 270:
-                return "VE"
-        
-        if(piece == "LH"):
-            if rotation == 90:
-                return "LV"
-            if rotation == 180:
-                return "LV"
-            if rotation == 270:
-                return "LV"
-        
-        if(piece == "LV"):
-            if rotation == 90:
-                return "LH"
-            if rotation == 180:
-                return "LH"
-            if rotation == 270:
-                return "LH"
-
    
     def expected_connections_calc(self, board):
         # Contar peças e calcular o número total de conexões esperadas
@@ -489,15 +521,27 @@ class PipeMania(Problem):
         um estado objetivo. Deve verificar se todas as posições do board 
         estão preenchidas de acordox com as regras do problema."""
         board = state.board
-        return board.count_real_connections() == self.expected_connections
+        return board.count_real_connections()[0] == self.expected_connections
     
-
+    
     def h(self, node: Node):
         """Heuristic function used for A* search."""
         current_state = node.state
-        #print(abs(self.expected_connections - current_state.board.count_real_connections()))
-        return abs(self.expected_connections - current_state.board.count_real_connections())
-    
+        # Count the number of unconnected pipes
+        unconnected_pipes = self.count_unconnected_pipes(current_state.board)
+        # Calculate the expected number of connections when the board is complete
+        expected_connections = self.expected_connections_calc(current_state.board)
+        
+        # Count the current number of real connections on the board
+        real_connections = current_state.board.count_real_connections()[0]
+        
+        # Heuristic is the sum of the difference in connections and the number of unconnected pipes
+        heuristic_value = abs(real_connections - expected_connections) + unconnected_pipes
+        # Debug print to check heuristic value
+        #print("h:", heuristic_value)
+        
+        return heuristic_value
+ 
     
     def print(self):
         return '\n'.join(' '.join(row) for row in self.board_list)
@@ -510,11 +554,11 @@ if __name__ == "__main__":
     board = Board.parse_instance()
     # Create a PipeMania object
     pipe_mania = PipeMania(board)
-    print("initial state:\n",board.print(),sep="")
     # Solve the problem using A* search
-    solution = breadth_first_tree_search(pipe_mania)
+    solution = astar_search(pipe_mania)
     # Print the solution
     print(solution.state.board.print())
+    
 
 
 
