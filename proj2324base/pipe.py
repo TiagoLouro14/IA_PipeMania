@@ -397,26 +397,6 @@ class PipeMania(Problem):
         board = state.board
         size = board.get_size()
         
-        # Use a set for actions for faster membership checking
-        middle_actions = set()
-        
-        # middle pieces
-        transformations = {
-            'VB': {'VC', 'VD', 'VE'},
-            'VC': {'VB', 'VD', 'VE'},
-            'VD': {'VB', 'VC', 'VE'},
-            'VE': {'VB', 'VC', 'VD'},
-            'FB': {'FC', 'FD', 'FE'},
-            'FC': {'FB', 'FD', 'FE'},
-            'FD': {'FB', 'FC', 'FE'},
-            'FE': {'FB', 'FC', 'FD'},
-            'BB': {'BC', 'BD', 'BE'},
-            'BC': {'BB', 'BD', 'BE'},
-            'BD': {'BB', 'BC', 'BE'},
-            'BE': {'BB', 'BC', 'BD'},
-            'LH': {'LV'},
-            'LV': {'LH'}
-        }
         # For each possible rotation...
         for row in range(size):
             for col in range(size):
@@ -451,6 +431,7 @@ class PipeMania(Problem):
                         actions.append((row, col, 'FE'))
                     elif piece == 'FE':
                         actions.append((row, col, 'FC'))
+                        
                         
                 # top row, not corners
                 elif row == 0 and 0 < col < size - 1 and size > 2:
@@ -517,16 +498,268 @@ class PipeMania(Problem):
                         actions.append((row, col, 'FB'))
                     
                 # middle pieces
-                elif 0 < row < size - 1 and 0 < col < size - 1 and size > 2:
-                    if piece in transformations:
-                        for new_piece in transformations[piece]:
-                            middle_actions.add((row, col, new_piece))
+                if 0 < row < size - 1 and 0 < col < size - 1 and size > 2:
+                    if piece.startswith('B'):
+                        left_condition = left in {'FD','BC','BB','BD','VB','VD','LH'}
+                        right_condition = right in {'FE','BC','BB','BE','VC','VE','LH'}
+                        up_condition = up in {'FB','BE','BD','VB','VE','VD','LV'}
+                        down_condition = down in {'FC','BE','BD','VB','VE','VD','LV'}
+                        
+                        if piece == 'BB':
+                            actions_bb = set()
+                            if left_condition:
+                                actions_bb.add((row, col, 'BD'))
+                                actions_bb.add((row, col, 'BC'))
+                                if down_condition:
+                                    actions_bb.add((row, col, 'BD'))
+                            if right_condition:
+                                actions_bb.add((row, col, 'BE'))
+                                actions_bb.add((row, col, 'BC'))
+                                if down_condition:
+                                    actions_bb.add((row, col, 'BE'))
+                            if down_condition:
+                                actions_bb.add((row, col, 'BE'))
+                                actions_bb.add((row, col, 'BD'))
+                                if left_condition:
+                                    actions_bb.add((row, col, 'BD'))
+                            actions.extend(actions_bb)
+                         
+                        if piece == 'BD':
+                            actions_bd = set()
+                            if left_condition:
+                                actions_bd.add((row, col, 'BE'))
+                                actions_bd.add((row, col, 'BC'))
+                                if down_condition:
+                                    actions_bd.add((row, col, 'BE'))
+                            if right_condition:
+                                actions_bd.add((row, col, 'BB'))
+                                actions_bd.add((row, col, 'BC'))
+                                if down_condition:
+                                    actions_bd.add((row, col, 'BB'))
+                            if down_condition:
+                                actions_bd.add((row, col, 'BB'))
+                                actions_bd.add((row, col, 'BE'))
+                                if left_condition:
+                                    actions_bd.add((row, col, 'BE'))
+                            actions.extend(actions_bd)
+                        
+                        if piece == 'BC':
+                            actions_bc = set()
+                            if left_condition:
+                                actions_bc.add((row, col, 'BD'))
+                                actions_bc.add((row, col, 'BB'))
+                                if up_condition:
+                                    actions_bc.add((row, col, 'BD'))
+                            if right_condition:
+                                actions_bc.add((row, col, 'BE'))
+                                actions_bc.add((row, col, 'BB'))
+                                if up_condition:
+                                    actions_bc.add((row, col, 'BE'))
+                            if up_condition:
+                                actions_bc.add((row, col, 'BE'))
+                                actions_bc.add((row, col, 'BD'))
+                                if left_condition:
+                                    actions_bc.add((row, col, 'BD'))
+                            actions.extend(actions_bc)
+                        
+                        if piece == 'BE':
+                            actions_be = set()
+                            if left_condition:
+                                actions_be.add((row, col, 'BD'))
+                                actions_be.add((row, col, 'BB'))
+                                if up_condition:
+                                    actions_be.add((row, col, 'BD'))
+                            if right_condition:
+                                actions_be.add((row, col, 'BC'))
+                                actions_be.add((row, col, 'BB'))
+                                if up_condition:
+                                    actions_be.add((row, col, 'BC'))
+                            if up_condition:
+                                actions_be.add((row, col, 'BC'))
+                                actions_be.add((row, col, 'BD'))
+                                if left_condition:
+                                    actions_be.add((row, col, 'BD'))
+                            actions.extend(actions_be)
+                    if piece.startswith('V'):
+                        left_condition = left in {'FD','BC','BB','BD','VB','VD','LH'}
+                        right_condition = right in {'FE','BC','BB','BE','VC','VE','LH'}
+                        up_condition = up in {'FB','BE','BD','VB','VE','VD','LV'}
+                        down_condition = down in {'FC','BE','BD','VB','VE','VD','LV'}
+                        
+                        if piece == 'VB':
+                            actions_vb = set()
+                            if left_condition:
+                                actions_vb.add((row, col, 'VD'))
+                                actions_vb.add((row, col, 'VC'))
+                                if up_condition:
+                                    actions_vb.add((row, col, 'VD'))
+                            if right_condition:
+                                actions_vb.add((row, col, 'VE'))
+                                actions_vb.add((row, col, 'VC'))
+                                if up_condition:
+                                    actions_vb.add((row, col, 'VE'))
+                            if up_condition:
+                                actions_vb.add((row, col, 'VE'))
+                                actions_vb.add((row, col, 'VD'))
+                                if left_condition:
+                                    actions_vb.add((row, col, 'VD'))
+                            actions.extend(actions_vb)
+                            
+                                    
+                        if piece == 'VC':
+                            actions_vc = set()
+                            if left_condition:
+                                actions_vc.add((row, col, 'VD'))
+                                actions_vc.add((row, col, 'VB'))
+                                if down_condition:
+                                    actions_vc.add((row, col, 'VD'))
+                            if right_condition:
+                                actions_vc.add((row, col, 'VE'))
+                                actions_vc.add((row, col, 'VB'))
+                                if down_condition:
+                                    actions_vc.add((row, col, 'VE'))
+                            if down_condition:
+                                actions_vc.add((row, col, 'VE'))
+                                actions_vc.add((row, col, 'VD'))
+                                if left_condition:
+                                    actions_vc.add((row, col, 'VD'))
+                            actions.extend(actions_vc)
+                            
+                        if piece == 'VE':
+                            actions_ve = set()
+                            if left_condition:
+                                actions_ve.add((row, col, 'VD'))
+                                actions_ve.add((row, col, 'VB'))
+                                if up_condition:
+                                    actions_ve.add((row, col, 'VD'))
+                            if right_condition:
+                                actions_ve.add((row, col, 'VC'))
+                                actions_ve.add((row, col, 'VB'))
+                                if up_condition:
+                                    actions_ve.add((row, col, 'VC'))
+                            if up_condition:
+                                actions_ve.add((row, col, 'VC'))
+                                actions_ve.add((row, col, 'VD'))
+                                if left_condition:
+                                    actions_ve.add((row, col, 'VD'))
+                            actions.extend(actions_ve)
+                        
+                        if piece == 'VD':
+                            actions_vd = set()
+                            if left_condition:
+                                actions_vd.add((row, col, 'VE'))
+                                actions_vd.add((row, col, 'VB'))
+                                if down_condition:
+                                    actions_vd.add((row, col, 'VE'))
+                            if right_condition:
+                                actions_vd.add((row, col, 'VC'))
+                                actions_vd.add((row, col, 'VB'))
+                                if down_condition:
+                                    actions_vd.add((row, col, 'VC'))
+                            if down_condition:
+                                actions_vd.add((row, col, 'VC'))
+                                actions_vd.add((row, col, 'VE'))
+                                if left_condition:
+                                    actions_vd.add((row, col, 'VE'))
+                            actions.extend(actions_vd)
+                                        
+                                                
+                    if piece.startswith('F'):
+                        
+                        left_condition = left in {'FC','FB','FE','BE','VC','LV','VE'}
+                        right_condition = right in {'FC','FB','FD','BD','VB','LV','VD'}
+                        up_condition = up in {'FC','FE','FD','BC','VC','VD','LH'}
+                        down_condition = down in {'FB','FE','FD','BC','VC','VD','LH'}
+                        
+                        if piece == 'FB':
+                            actions_fb = set()
+                            if left_condition:
+                                actions_fb.add((row, col, 'FD'))
+                                actions_fb.add((row, col, 'FC'))
+                                if up_condition:
+                                    actions_fb.add((row, col, 'FD'))
+                            if right_condition:
+                                actions_fb.add((row, col, 'FE'))
+                                actions_fb.add((row, col, 'FC'))
+                                if up_condition:
+                                    actions_fb.add((row, col, 'FE'))
+                            if up_condition:
+                                actions_fb.add((row, col, 'FE'))
+                                actions_fb.add((row, col, 'FD'))
+                                if left_condition:
+                                    actions_fb.add((row, col, 'FD'))
+                            actions.extend(actions_fb)
+                            
+                                    
+                        if piece == 'FC':
+                            actions_fc = set()
+                            if left_condition:
+                                actions_fc.add((row, col, 'FD'))
+                                actions_fc.add((row, col, 'FB'))
+                                if down_condition:
+                                    actions_fc.add((row, col, 'FD'))
+                            if right_condition:
+                                actions_fc.add((row, col, 'FE'))
+                                actions_fc.add((row, col, 'FB'))
+                                if down_condition:
+                                    actions_fc.add((row, col, 'FE'))
+                            if down_condition:
+                                actions_fc.add((row, col, 'FE'))
+                                actions_fc.add((row, col, 'FD'))
+                                if left_condition:
+                                    actions_fc.add((row, col, 'FD'))
+                            actions.extend(actions_fc)
+                            
+                        if piece == 'FE':
+                            actions_fe = set()
+                            if left_condition:
+                                actions_fe.add((row, col, 'FD'))
+                                actions_fe.add((row, col, 'FB'))
+                                if up_condition:
+                                    actions_fe.add((row, col, 'FD'))
+                            if right_condition:
+                                actions_fe.add((row, col, 'FC'))
+                                actions_fe.add((row, col, 'FB'))
+                                if up_condition:
+                                    actions_fe.add((row, col, 'FC'))
+                            if up_condition:
+                                actions_fe.add((row, col, 'FC'))
+                                actions_fe.add((row, col, 'FD'))
+                                if left_condition:
+                                    actions_fe.add((row, col, 'FD'))
+                            actions.extend(actions_fe)
+                            
+                        if piece == 'FD':
+                            actions_fd = set()
+                            if left_condition:
+                                actions_fd.add((row, col, 'FE'))
+                                actions_fd.add((row, col, 'FB'))
+                                if down_condition:
+                                    actions_fd.add((row, col, 'FE'))
+                            if right_condition:
+                                actions_fd.add((row, col, 'FC'))
+                                actions_fd.add((row, col, 'FB'))
+                                if down_condition:
+                                    actions_fd.add((row, col, 'FC'))
+                            if down_condition:
+                                actions_fd.add((row, col, 'FC'))
+                                actions_fd.add((row, col, 'FE'))
+                                if left_condition:
+                                    actions_fd.add((row, col, 'FE'))
+                            actions.extend(actions_fd)
+                            
+                    if piece == 'LV':
+                        if up in {'FC','FE','FD','BC','VC','VD','LH'} or down in {'FB','FE','FD','BC','VC','VD','LH'}:
+                            actions.append((row, col, 'LH'))
                     
-                    # Add the middle actions to the list of actions
-                    actions.extend(middle_actions)
+                    if piece == 'LH':
+                        if left in {'FD','BC','BB','BD','VB','VD','LH'} or right in {'FE','BC','BB','BE','VC','VE','LH'}:
+                            actions.append((row, col, 'LV'))
+                    
+                    
                     
 
-                    
+        actions = set(actions)
         #print("actions:",actions)    
         #Return the list of actions
         return actions
@@ -578,15 +811,10 @@ class PipeMania(Problem):
     def h(self, node: Node):
         """Heuristic for the PipeMania problem: prefer nodes with pieces starting with 'B', then 'V' or 'L', and finally 'F'."""
         state = node.state
-        b_count = sum(1 for row in state.board for piece in row if piece.startswith('B'))
-        vl_count = sum(1 for row in state.board for piece in row if piece.startswith('V') or piece.startswith('L'))
-        f_count = sum(1 for row in state.board for piece in row if piece.startswith('F'))
-        
-        # Calculate flow potential heuristic
-        flow_potential = self.expected_connections - state.board.count_real_connections()[0]
-        
-        return -b_count * 3, -vl_count * 2, -f_count, flow_potential
 
+    
+
+        return self.expected_connections - state.board.count_real_connections()[0] + self.count_unconnected_pipes(state.board)
 
     
     def print(self):
